@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;700&family=Shadows+Into+Light&display=swap');
+
+@font-face {
+    font-family: 'The-Bold-Font';
+    src: url('fonts/The-Bold-Font.ttf.woff') format('woff'),
+        url('fonts/The-Bold-Font.ttf.svg#The-Bold-Font') format('svg'),
+        url('fonts/The-Bold-Font.ttf.eot'),
+        url('fonts/The-Bold-Font.ttf.eot?#iefix') format('embedded-opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: var(--secondary-color);
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Shadows Into Light', cursive;
+}
+
+h4,
+h5,
+h6 {
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    overflow-x: hidden;
+}
+
+
+#notifications {
+    position: absolute;
+    z-index: 9999;
+    display: flex;
+    gap: .2rem;
+    flex-direction: column;
+    top: 10px;
+    right: 10px;
+    max-height: 240px;
+
+    .toast {
+        position: relative;
+        background-color: white;
+        border-left: 5px solid;
+        z-index: 9999;
+        padding: 1rem;
+        margin-bottom: .5rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+        display: flex;
+        align-items: center;
+        font-size: .8rem;
+        gap: 1rem;
+        max-width: 300px;
+        min-width: 250px;
+    }
+
+    .icon {
+        &-close {
+            opacity: .8;
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: .5rem;
+            cursor: pointer;
+        }
+
+        &-success-color {
+            color: var(--success-color);
+        }
+
+        &-danger-color {
+            color: var(--danger-color);
+        }
+
+        &-info-color {
+            color: var(--info-color);
+        }
+
+        &-warning-color {
+            color: var(--warning-color);
+        }
+    }
+
+    .in {
+        animation: pop 1s ease forwards;
+    }
+
+    .out {
+        animation: pop-out 1s ease forwards;
+    }
+}
+
+@keyframes pop {
+    0% {
+        transform: translateY(100%);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes pop-out {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+
+
+
+.success {
+    color: var(--success-color);
+}
+
+.danger {
+    color: var(--danger-color);
+}
+
+.flex {
+    display: flex;
+}
+
+.gap {
+    gap: 1rem;
+}

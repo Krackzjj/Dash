@@ -1,0 +1,82 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import Badge from '../Badge.vue';
+interface Props {
+    label: string
+    opts: string[]
+}
+
+
+const props = defineProps<Props>()
+
+// Couleurs originales (100% luminosité)
+const colors = [
+    'rgb(187, 247, 208)',
+    'rgb(186, 230, 253)',
+    'rgb(233, 213, 255)',
+    'rgb(254, 215, 170)',
+    'rgb(251, 207, 232)'
+];
+
+
+
+const handleClick = (index: number) => {
+    if (selectedOpt.value.includes(index)) {
+        selectedOpt.value = selectedOpt.value.filter(opt => opt !== index)
+    } else {
+        selectedOpt.value.push(index)
+    }
+}
+let selectedOpt = ref<number[]>([])
+
+</script>
+
+
+<template>
+    <div>
+        <h4>{{ props.label }}</h4>
+        <div class="opts">
+            <Badge class="opt" v-for="opt, index in props.opts" :key="index"
+                :backgroundColor="colors[index % colors.length]"
+                :class="`${selectedOpt?.includes(index) ? 'opt-active' : ''}`" @click="handleClick(index)">{{ opt }} <i>({{
+                    index }})</i></Badge>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+div:not(.opts) {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: .5rem;
+}
+
+.opts {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: .5rem;
+    gap: .5rem;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 5px;
+    background-color: white;
+
+    .opt {
+        cursor: pointer;
+        opacity: .5;
+    }
+
+    .opt-active {
+        opacity: 1;
+    }
+
+    i {
+        font-style: normal;
+        font-weight: normal;
+    }
+
+}
+</style>
