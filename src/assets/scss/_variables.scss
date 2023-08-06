@@ -19,10 +19,24 @@ $colors: (
     'disabled': #e5e5e5,
 );
 
+$font-sizes: (
+    'xs': .8rem,
+    'sm': 1rem,
+    'md': 1.5rem,
+    'lg': 2rem,
+    'xl': 2.5rem,
+    'xxl': 3rem,
+);
+
 :root {
 
     @each $color,
     $value in $colors {
         --#{$color}-color: #{$value};
+    }
+
+    @each $size,
+    $value in $font-sizes {
+        --font-#{$size}: #{$value};
     }
 }

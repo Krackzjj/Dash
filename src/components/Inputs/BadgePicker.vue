@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import Badge from '../Badge.vue';
 interface Props {
-    label: string
+    label?: string
     opts: string[]
 }
 
@@ -34,7 +34,7 @@ let selectedOpt = ref<number[]>([])
 
 <template>
     <div>
-        <h4>{{ props.label }}</h4>
+        <h4 v-if="props.label">{{ props.label }}</h4>
         <div class="opts">
             <Badge class="opt" v-for="opt, index in props.opts" :key="index"
                 :backgroundColor="colors[index % colors.length]"

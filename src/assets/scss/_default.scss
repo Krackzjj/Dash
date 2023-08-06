@@ -136,10 +136,23 @@ body {
     color: var(--danger-color);
 }
 
-.flex {
-    display: flex;
+.justify-center {
+    justify-content: center;
 }
 
-.gap {
-    gap: 1rem;
+.items-center {
+    align-items: center;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.gap-\[0\.5\] {
+    gap: .5rem;
+}
+
+.v-popper__inner {
+    font-size: var(--font-xs);
 }

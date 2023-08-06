@@ -32,6 +32,8 @@ function createElement(tag: string, className?: string): HTMLElement {
 // Crée et configure un toast 
 function createToast({ type, icon, message }: Toast): HTMLElement {
 
+    document.body.appendChild(createElement('div')).setAttribute('id', 'notifications')
+
     const toastNode = document.createElement('div')
 
     toastNode.appendChild(createElement('i', CLASS_CLOSE)).classList.add(CLASS_CLOSE)
@@ -94,6 +96,6 @@ export default function useToast(toast: Toast) {
     setTimeout(() => {
         toastList.shift()
         newToast.remove()
+        if (toastList.length === 0) notifications?.remove()
     }, 3000)
-
 }

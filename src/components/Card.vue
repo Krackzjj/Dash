@@ -1,16 +1,20 @@
 <script setup lang="ts">
 const props = defineProps<{
     anot?: string
+    flex?: boolean
 }>()
 </script>
 <template>
     <div class="card">
         <div v-if="props.anot" class="anot">{{ props.anot }}</div>
 
-        <div class="card-body">
+        <div :class="props.flex ? 'card-body-flex' : 'card-body'">
             <slot></slot>
             <div class="content">
                 <slot name="body"></slot>
+            </div>
+            <div class="footer">
+                <slot name="footer"></slot>
             </div>
 
         </div>
@@ -30,12 +34,25 @@ const props = defineProps<{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    &-flex {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        height: 100%;
+    }
 }
 
 .content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+.footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }
 
 .anot {

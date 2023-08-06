@@ -40,12 +40,7 @@ main {
   height: 100vh;
 
   #lateral {
-    z-index: 2;
-    grid: 0 / 1;
-  }
-
-  .main-container {
-    grid: 1 / 2;
+    z-index: 1000;
   }
 }
 </style>

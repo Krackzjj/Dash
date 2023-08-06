@@ -1,0 +1,110 @@
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    text-align: center;
+    user-select: none;
+
+    color: var(--secondary-color);
+
+    cursor: pointer;
+
+    border: none;
+    border-radius: 5px;
+
+    padding: .5rem 1rem;
+    width: fit-content;
+
+    transition: all .3s ease;
+
+    &:hover {
+        background-color: var(--primary-color);
+        color: var(--secondary-color);
+    }
+
+    &::before {
+        color: var(--secondary-color);
+    }
+}
+
+.disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+@each $color,
+$value in $colors {
+
+
+    .btn-#{$color} {
+        @extend .btn;
+        background-color: var(--#{$color}-color);
+
+        &-hollow {
+            background-color: transparent;
+            border: 1px solid var(--#{$color}-color);
+            color: var(--#{$color}-color);
+
+            &:hover {
+                background-color: var(--#{$color}-color);
+            }
+
+            &-nb {
+                background-color: transparent;
+                border: none;
+                color: var(--#{$color}-color);
+
+                &:hover {
+                    background-color: transparent;
+                }
+            }
+        }
+
+        &:hover {
+            background-color: darken($value, 10%);
+        }
+
+        &.no-hover {
+            &:hover {
+                background-color: transparent;
+                color: var(--#{$color}-color);
+            }
+        }
+
+    }
+
+}
+
+$sizes: (
+    xs: (padding: .5rem 1rem,
+        font-size: .8rem,
+    ),
+    sm: (padding: .7rem 1.7rem,
+        font-size: .9rem,
+    ),
+    md: (padding: 1.5rem 2.5rem,
+        font-size: 1.2rem,
+    ),
+    lg: (padding: 2rem 3rem,
+        font-size: 1.4rem,
+    ),
+    xl: (padding: 2.5rem 3.5rem,
+        font-size: 1.6rem,
+    ),
+    xxl: (padding: 3rem 4rem,
+        font-size: 1.8rem,
+    ),
+);
+
+@each $key,
+$style in $sizes {
+    .btn-#{$key} {
+        font-size: map-get($style, font-size);
+        padding: map-get($style, padding);
+
+        &.no-space {
+            padding: 0;
+        }
+    }
+}

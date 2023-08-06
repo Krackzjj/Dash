@@ -29,9 +29,7 @@ const classTab = computed(() => {
 
 
 <template>
-    <div class="img-wrapper">
-        <img :class="classTab" v-bind="{ ...$attrs }" :src="props.src" :alt="alt" :style="style">
-    </div>
+    <img :class="classTab" v-bind="{ ...$attrs }" :src="props.src" :alt="alt" :style="style">
 </template>
 
 

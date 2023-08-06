@@ -3,20 +3,12 @@ import _ from 'lodash';
 
 import { ref } from 'vue';
 
-import BadgePicker from '@/components/Inputs/BadgePicker.vue';
 import Badge from '@/components/Badge.vue';
+import Toolbar from './Toolbar.vue';
 
 import { useImg } from '@/composables/useImg';
 
 const { data: imgs } = useImg()
-
-let asideState = ref(false)
-let button = ref('icon-chevron-right')
-let toggleSideBar = () => {
-    asideState.value = !asideState.value;
-    button.value = asideState.value ? "icon-chevron-left" : "icon-chevron-right";
-}
-
 
 interface SelectedImg {
     id?: number;
@@ -55,7 +47,6 @@ let selectedImg = (id?: number, opts?: { global?: boolean }) => {
         if (!isRegister) {
             selected.value.push({ id: id, selected: true });
         } else {
-            console.log('selected')
             isRegister.selected = !isRegister.selected;
         }
     }
@@ -84,155 +75,180 @@ const badgeColors = [
     }
 ];
 
-const filters = ['Publiées', 'Externe', 'Interne', 'GIF', 'Vidéo', 'Image']
-const tooltip = [{
-    text: 'copié le lien',
-    position: {
-        bottom: '45px',
-        left: '58%'
-    }
-}, {
-    text: 'télécharger',
-    position: {
-        bottom: '45px',
-        left: '67%'
-    }
-}]
+
+const view_type = ref<string>('grid')
+
+const toolBarSize = ref<string>('60px')
+const toolBarState = ref<boolean>(false)
+let handleToolbar = () => {
+    toolBarState.value = !toolBarState.value
+    setTimeout(() => {
+        toolBarSize.value = toolBarSize.value === '300px' ? '60px' : '300px'
+    }, 10)
+}
+
+let updateView = (view: string) => {
+    view_type.value = view
+}
 
 </script>
 <template>
-    <div class="flex">
-        <aside :class="`${asideState ? '' : 'active'}`">
-            <nav>
-                <ul>
-                    <li>
-                        <BadgePicker label="Filtrer par types" :opts="filters" />
-                    </li>
-                    <li>
-                        <InputText label="Search good image" indicator="Find by URL, name, type and width/height." />
-                    </li>
-                    <li>
-                        <h4>Select</h4>
-                        <Button noBackground :label="`${allSelected ? 'Deselect' : 'Select'} All`"
-                            :icon="`icon-${allSelected ? 'none' : 'check'}-circle`"
-                            @click="selectedImg(undefined, { global: true })" />
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        <Button square xsm @click="toggleSideBar"><i :class="button"></i></Button>
+    <div class="container">
+        <Toolbar :id="toolBarState ? 'translate-to-right' : 'translate-to-left'" :visible="toolBarState"
+            @toggle="handleToolbar" :view="view_type" @update:view="updateView" />
         <main>
-
-            <Card class="card" v-for="img in imgs" :anot="img.dimensions" :key="img.id"
-                @mouseover="hoveredImg(img.id, true)" @mouseleave="hoveredImg(img.id, false)">
-                <div :class="`cercle ${selected.find((el) => el.id === img.id)?.selected === true ? 'selected' : ''}`"
-                    v-show="isHovered(img.id)">
-                </div>
-                <Img rounded="5px" clickable :src="img.path" @click.stop="selectedImg(img.id)" />
-                <template #body>
-                    <div>
-                        <p class="name">{{ img.name }}</p>
-                        <Badge :backgroundColor="_.find(badgeColors, { name: img.type.toUpperCase() })?.color">{{
-                            img.type }}
-                        </Badge>
+            <ul class="view-grid" v-if="view_type === 'grid'">
+                <Card v-if="view_type === 'grid'" class="card" v-for="img in imgs" :anot="img.dimensions" :key="img.id"
+                    @mouseover="hoveredImg(img.id, true)" @mouseleave="hoveredImg(img.id, false)">
+                    <div :class="`cercle ${selected.find((el) => el.id === img.id)?.selected === true ? 'selected' : ''}`"
+                        v-show="isHovered(img.id)" @click.stop="selectedImg(img.id)">
                     </div>
-                    <div class="btn-utils">
-                        <Button noBackground noBorder icon="icon-link" xsm :tooltip="tooltip[0]" />
-                        <Button noBackground noBorder icon="icon-download" xsm :tooltip="tooltip[1]" />
-                    </div>
-                </template>
-            </Card>
+                    <Img rounded="5px" clickable :src="img.path" @click.stop="selectedImg(img.id)" />
+                    <template #body>
+                        <div>
+                            <p class="name">{{ img.name }}</p>
+                            <Badge :backgroundColor="_.find(badgeColors, { name: img.type.toUpperCase() })?.color">{{
+                                img.type }}
+                            </Badge>
+                        </div>
+                    </template>
+                    <template #footer>
+                        <Button v-tooltip="'copy link'" hollow :opts="{ noBorder: true, noHover: true }">
+                            <template #icon>
+                                <i class="icon-link"></i>
+                            </template>
+                        </Button>
+                        <Button v-tooltip="'download'" hollow :opts="{ noBorder: true, noHover: true }">
+                            <template #icon>
+                                <i class="icon-download"></i>
+                            </template>
+                        </Button>
+                    </template>
+                </Card>
+            </ul>
         </main>
     </div>
 </template>
 <style scoped lang="scss">
-aside {
-    &.active {
-        z-index: 1;
-        transform: translateX(-95%);
-        width: 0%;
-        opacity: 0;
-
-        * {
-            display: none;
-        }
-    }
-
-    transition: transform 0.5s,
-    width 0.5s;
-    display: flex;
-    flex-direction: column;
-    background-color: whitesmoke;
-    width: 25%;
-    height: 100vh;
+.container {
+    display: grid;
+    grid-template-columns: v-bind(toolBarSize) 1fr;
 }
 
-ul {
-    padding-inline: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+#translate-to-right {
+    animation: slide 0.2s ease-in forwards;
+}
 
-    li {
-        Button {
-            width: 100%;
-        }
+#translate-to-left {
+    animation: slideleft 0.2s ease-out forwards;
+}
+
+@keyframes slide {
+    0% {
+        transform: translateX(-50px);
+    }
+
+    100% {
+        transform: translateX(0);
     }
 }
 
-#side-bar-btn {
-    z-index: 2;
+@keyframes slideleft {
+    0% {
+        transform: translateX(0px);
+    }
+
+    50% {
+        transform: translateX(-10px);
+    }
+
+    100% {
+        transform: translateX(0px);
+    }
 }
 
 main {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+.view-grid {
+    margin-left: 1.5rem;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: .5rem;
-    padding: 1rem;
     height: 100vh;
     overflow-y: scroll;
 }
 
+.view-list {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    height: 100vh;
+    overflow-y: scroll;
+
+    li {
+        display: flex;
+        align-items: center;
+        width: 75%;
+        height: 150px;
+        margin: auto;
+        padding: .5rem;
+        border: 1px solid #ccc;
+
+        .img-wrap {
+            width: 100px;
+            height: 100px;
+            overflow: hidden;
+            margin-right: 1rem;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .img-info {
+            p {
+                font-size: 0.8rem;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .btn-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-left: 1rem;
+    }
+}
+
 .card {
     height: 300px;
-}
 
-.desc {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    &-list {
 
-    .name {
-        font-size: 0.8rem;
-        font-style: italic;
+        height: 100px;
+
+        img {
+            width: 100px;
+        }
     }
 }
 
-.btn-utils {
-    display: flex;
-    align-self: flex-end;
+.name {
+    font-size: 0.8rem;
+    font-style: italic;
 }
 
-.tip {
-    position: absolute;
-    inset: 70% auto 20% 60%;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 5px;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-    padding: .5em;
 
-    &::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 80%;
-        border-width: 5px;
-        border-style: solid;
-        border-color: var(--primary-color) transparent transparent transparent;
-    }
-}
 
 .cercle {
     &.selected {
