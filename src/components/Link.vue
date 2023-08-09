@@ -1,20 +1,36 @@
 <script setup lang="ts">
+import { toRefs, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 
 interface Props {
     to: string;
     icon?: (string | undefined) | (string | undefined)[];
-    label: string;
+    label?: string;
 }
 const props = defineProps<Props>()
 
+const { to, icon, label } = toRefs(props)
+
+const icons = computed(() => {
+    if (icon?.value instanceof Array) {
+        return {
+            'icon-left': `icon-${icon?.value[0]}`,
+            'icon-right': `icon-${icon?.value[1]}`
+        }
+    } else {
+        return {
+            class: `icon-${icon?.value}`
+        }
+    }
+})
 
 </script>
 <template>
-    <RouterLink class="router-link" :to="props.to">
-        <i v-if="props.icon" :class="props.icon.length > 1 ? props.icon : props.icon[0]"></i>
-        <span>{{ props.label }}</span>
-        <i v-if="props.icon?.length" :class="props.icon[1]"></i>
+    <RouterLink class="router-link" :to="to">
+        <i v-if="icon" :class="icons['icon-right'] || icons.class"></i>
+        {{ label }}
+        <slot v-if="!label"></slot>
+        <i v-if="icon" :class="icons['icon-left']"></i>
     </RouterLink>
 </template>
 <style lang="scss" scoped>
@@ -23,10 +39,6 @@ const props = defineProps<Props>()
     i:last-child {
         margin-left: 1rem;
         font-size: small;
-    }
-
-    span {
-        margin-left: 1rem;
     }
 }
 </style>

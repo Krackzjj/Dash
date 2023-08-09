@@ -1,7 +1,22 @@
 <script setup lang="ts">
+import { computed, toRefs } from 'vue';
+import { Colors } from '@/types/Components/ColorType';
 const props = defineProps<{
-    backgroundColor?: string
+    backgroundColor: string
 }>()
+
+const { backgroundColor } = toRefs(props)
+
+const background = backgroundColor.value.toUpperCase()
+
+let thisBackground = computed(() => {
+    if (Colors[background]) {
+        return Colors[background]
+    } else {
+        return Colors.Other
+    }
+})
+
 </script>
 
 <template>
@@ -21,6 +36,6 @@ span {
     text-align: center;
     user-select: none;
     letter-spacing: .05ch;
-    background-color: v-bind(backgroundColor);
+    background-color: v-bind(thisBackground);
 }
 </style>

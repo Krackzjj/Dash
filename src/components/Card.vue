@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import { toRefs } from 'vue'
+
+
 const props = defineProps<{
     anot?: string
-    flex?: boolean
+    isLoading?: boolean
 }>()
+
+const { anot, isLoading } = toRefs(props)
+
 </script>
 <template>
     <div class="card">
-        <div v-if="props.anot" class="anot">{{ props.anot }}</div>
-
-        <div :class="props.flex ? 'card-body-flex' : 'card-body'">
+        <div v-if="anot" class="anot">{{ anot }}</div>
+        <div v-if="isLoading">Loading ...</div>
+        <div v-else class="card-body">
             <slot></slot>
             <div class="content">
                 <slot name="body"></slot>
@@ -16,17 +22,18 @@ const props = defineProps<{
             <div class="footer">
                 <slot name="footer"></slot>
             </div>
-
         </div>
     </div>
 </template>
 <style scoped lang="scss">
 .card {
     position: relative;
+    border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: whitesmoke;
-    padding: 1rem;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    padding: .5rem;
+    margin: .2rem;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .card-body {
@@ -34,13 +41,6 @@ const props = defineProps<{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
-    &-flex {
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        height: 100%;
-    }
 }
 
 .content {

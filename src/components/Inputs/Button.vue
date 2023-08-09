@@ -8,7 +8,7 @@ type Sizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
 type Opts = {
     noBorder: boolean,
     noHover: boolean,
-    noSpace: boolean
+    noSpace: boolean,
 }
 
 interface Props {
@@ -50,6 +50,7 @@ const icons = computed(() => {
         }
     }
 })
+
 </script>
 
 <template>

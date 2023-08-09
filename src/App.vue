@@ -31,6 +31,7 @@ import LateralBar from '@/components/layout/LateralBar.vue';
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100vw;
 }
 
 

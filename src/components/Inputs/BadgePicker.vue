@@ -1,28 +1,25 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Badge from '../Badge.vue';
+
+export type Filter = {
+    type: string;
+    number: number;
+}
 interface Props {
     label?: string
-    opts: string[]
+    opts?: Filter[]
 }
-
 
 const props = defineProps<Props>()
 
-// Couleurs originales (100% luminosité)
-const colors = [
-    'rgb(187, 247, 208)',
-    'rgb(186, 230, 253)',
-    'rgb(233, 213, 255)',
-    'rgb(254, 215, 170)',
-    'rgb(251, 207, 232)'
-];
 
 
 
 const handleClick = (index: number) => {
     if (selectedOpt.value.includes(index)) {
         selectedOpt.value = selectedOpt.value.filter(opt => opt !== index)
+        console.log(selectedOpt.value)
     } else {
         selectedOpt.value.push(index)
     }
@@ -36,10 +33,14 @@ let selectedOpt = ref<number[]>([])
     <div>
         <h4 v-if="props.label">{{ props.label }}</h4>
         <div class="opts">
-            <Badge class="opt" v-for="opt, index in props.opts" :key="index"
-                :backgroundColor="colors[index % colors.length]"
-                :class="`${selectedOpt?.includes(index) ? 'opt-active' : ''}`" @click="handleClick(index)">{{ opt }} <i>({{
-                    index }})</i></Badge>
+            <Suspense>
+                <Badge class="opt" v-for="opt, index in props.opts" :key="index" :backgroundColor="opt.type"
+                    :class="`${selectedOpt?.includes(index) ? 'opt-active' : ''}`" @click="handleClick(index)">{{ opt.type
+                    }}
+                    <i>({{
+                        opt.number }})</i>
+                </Badge>
+            </Suspense>
         </div>
     </div>
 </template>

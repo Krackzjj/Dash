@@ -2,8 +2,7 @@
 import { ref } from 'vue';
 
 const props = defineProps<{
-    data: any
-    overlay?: boolean
+    data?: any
 }>()
 
 
@@ -17,15 +16,15 @@ defineExpose({ toggle });
 </script>
 <template>
     <Teleport to="body">
-        <div class='overlay' :class="props.overlay ? 'bg' : ''" v-if="isOpen">
+        <div class='overlay' v-if="isOpen">
             <div class="container">
                 <div class="content">
                     <div class="title">
-                        <Button id="close" @click="toggle" xsm><i class="icon-close"></i> </Button>
+                        <Button id="close" @click="toggle"><i class="icon-close"></i></Button>
                         <slot v-if="$slots.title" name="title" />
                     </div>
-                    <div class="body">
-                        <slot v-if="$slots.body" name="body" :data="data" />
+                    <div class="inner-content">
+                        <slot :data="props.data" />
                     </div>
                 </div>
             </div>
@@ -41,20 +40,28 @@ defineExpose({ toggle });
     left: 0;
     width: 100%;
     height: 100%;
-}
-
-.bg {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
 .container {
     position: relative;
-    width: v-bind("$attrs.width");
-    height: v-bind("$attrs.height");
+    width: 50%;
+    height: fit-content;
+    max-height: 80vh;
     background-color: white;
-    border-radius: .5rem;
+    border-radius: 5px;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 
+}
+
+.content {
+    flex-grow: 1;
+
+    .inner-content {
+        height: 100%;
+    }
 }
 
 #close {

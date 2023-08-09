@@ -1,39 +1,14 @@
 <script setup lang="ts">
 import Link from '@/components/Link.vue';
-interface Route {
-    name: string;
-    path: string;
-    children?: Route[];
-}
+
+import { Route } from '@/types/Router/Routes';
 
 
 const props = defineProps<{
     routes: Route[];
 }>()
 
-const iconsRoute = [
-    {
-        name: 'Accueil',
-        icon: 'icon-home',
-    }, {
-        name: 'Articles',
-        icon: 'icon-folder',
-    }, {
-        name: 'Utilisateurs',
-        icon: 'icon-user-circle',
-    }, {
-        name: 'Galerie',
-        icon: 'icon-image',
-    }
-]
 
-let associatedRoutes = (routeName: string) => {
-    return iconsRoute.find((route) => route.name === routeName)?.icon
-}
-
-
-const ignoreRoutes = ['Auth', 'NotFound'];
-const routes = props.routes.filter((route) => !ignoreRoutes.includes(route.name));
 
 
 </script>
@@ -44,12 +19,20 @@ const routes = props.routes.filter((route) => !ignoreRoutes.includes(route.name)
             <a href="#">Author</a>
         </div>
         <div class="main-nav">
-            <ul>
-                <li v-for="route in  routes " :class="$route.path === route.path ? 'active' : ''">
-                    <Link :to="route.path" :label="route.name"
-                        :icon="route.children ? [associatedRoutes(route.name), 'icon-chevron-right'] : associatedRoutes(route.name)" />
-                </li>
-            </ul>
+            <template v-for="route in props.routes" :key="route.name">
+                <Link v-if="route.meta.enable" class="navLink" :class="$route.path === route.path ? 'active' : ''"
+                    :to="route.path"
+                    :icon="route.children && route.children?.map(child => child.meta.enable).length > 1 ? ['chevron-right', route.icon] : route.icon"
+                    :label="route.label">
+                </Link>
+                <template v-if="route.meta.enable && route.children">
+                    <template v-for="child in route.children" :key="child.name">
+                        <Link v-if="child.meta.enable && $route.path.includes(route.path)" class="navLink navLink-child"
+                            :class="$route.path.includes(child.path) ? 'active' : ''" :to="child.path" :icon="child.icon"
+                            :label="child.label" />
+                    </template>
+                </template>
+            </template>
         </div>
     </nav>
 </template>
@@ -57,33 +40,29 @@ const routes = props.routes.filter((route) => !ignoreRoutes.includes(route.name)
 nav {
     background-color: var(--primary-color);
     color: var(--secondary-color);
-
-    ul {
-        display: flex;
-        flex-direction: column;
-        gap: .5rem;
-
-        li {
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding-block: .5rem;
-
-            a {
-                padding-left: 1rem;
-            }
-
-            &.active {
-                background-color: var(--info-color);
-            }
-        }
-    }
 }
 
-.child-list {
-    padding-left: 2rem;
+.main-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: .5rem;
+    padding: 1rem 0;
+    user-select: none;
 
-    li {
-        font-size: .9rem;
+    .navLink {
+        width: 100%;
+        padding: .5rem 1rem;
+
+        &.active {
+            background-color: var(--info-color);
+            color: var(--secondary-color);
+        }
+
+        &.navLink-child {
+            padding-left: 2rem;
+            padding-block: .2rem;
+        }
     }
 }
 

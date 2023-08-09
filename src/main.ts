@@ -5,10 +5,9 @@ import { VueQueryPlugin } from '@tanstack/vue-query';
 
 import routes from '@/routes/Router';
 
-import { tooltipDirective } from '@/directives/tooltip';
-
 import Button from '@/components/Inputs/Button.vue';
 import InputText from '@/components/Inputs/InputText.vue';
+import Link from '@/components/Link.vue';
 import Img from '@/components/Img.vue';
 import Card from '@/components/Card.vue';
 import Modal from '@/components/layout/Modal.vue';
@@ -25,7 +24,6 @@ const router = routes()
 
 const app = createApp(App)
 
-app.directive('tooltip', tooltipDirective)
 
 app.component('Button', Button)
 app.component('InputText', InputText)
@@ -33,12 +31,11 @@ app.component('Card', Card)
 app.component('Modal', Modal)
 app.component('Img', Img)
 app.component('Form', Form)
+app.component('Link', Link)
 
 app.use(pinia)
 app.use(VueQueryPlugin)
 app.use(router)
-
-
 
 app.mount('#app')
 

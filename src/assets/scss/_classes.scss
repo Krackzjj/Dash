@@ -131,8 +131,43 @@ $value in $spacings {
     }
 }
 
+@each $color,
+$value in $colors {
+    .bg-#{$color} {
+        background-color: $value;
 
+        &\[i\] {
+            background-color: $value !important;
+        }
+    }
 
+    .text-#{$color} {
+        color: $value;
+
+        &\[i\] {
+            color: $value !important;
+        }
+    }
+
+    .border-#{$color} {
+        border-color: $value;
+
+        &\[i\] {
+            border-color: $value !important;
+        }
+    }
+}
+
+@each $size,
+$value in $font-sizes {
+    .text-#{$size} {
+        font-size: $value;
+
+        &\[i\] {
+            font-size: $value !important;
+        }
+    }
+}
 
 .w-full {
     width: 100% !important;
@@ -156,4 +191,8 @@ $value in $spacings {
 
 .align-center {
     align-items: center;
+}
+
+.bold {
+    font-weight: bold;
 }

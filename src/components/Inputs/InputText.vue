@@ -17,13 +17,12 @@ watch(data, (value) => {
 })
 
 </script>
-
-
 <template>
     <div>
-        <label for="">{{ props.label }}</label>
+        <label :for="props.label.toLowerCase()">{{ props.label }}</label>
         <div class="input-group">
-            <input type="text" v-bind="$attrs" v-model="data" :placeholder="props.label">
+            <input :name="props.label.toLowerCase()" :id="props.label.toLowerCase()" type="text" v-bind="$attrs"
+                v-model="data" :placeholder="$attrs.placeholder + ' ...'">
             <p id="sub">{{ props.indicator }}</p>
         </div>
     </div>

@@ -1,52 +1,61 @@
-import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Users from '@/views/Users.vue'
 import Posts from '@/views/Posts.vue'
 import CreatePost from '@/views/CreatePost.vue'
-import Gallery from '@/views/Gallery/Gallery.vue'
+import Gallery from '@/views/Gallery.vue'
+import { Route } from '@/types/Router/Routes'
 
 
-
-export const routes: any[] = [
-    {
-        path: '/auth',
-        name: 'Auth',
-        children: [
-            {
-                path: 'login',
-                name: 'Login',
-                component: Login
-            },
-            {
-                path: 'logout',
-                name: 'Logout',
-            },
-        ],
-    },
+export const routes: Route[] = [
     {
         path: '/',
-        name: 'Accueil',
+        name: 'main.home',
+        label: 'Home',
+        icon: 'home',
+        meta: {
+            enable: true,
+        },
         component: Home,
     }, {
-        path: '/galery',
-        name: 'Galerie',
+        path: '/gallery',
+        name: 'gallery',
+        label: 'Gallery',
+        icon: 'images',
+        meta: {
+            enable: true,
+        },
         component: Gallery,
     },
     {
         path: '/posts',
-        name: 'Articles',
+        name: 'posts.list',
+        label: 'Posts',
+        icon: 'folder',
+        meta: {
+            enable: true,
+        },
         component: Posts,
         children: [
             {
-                path: 'create',
-                name: 'Ecrire un article',
+                path: 'posts/create',
+                name: 'posts.create',
+                label: 'Create',
+                icon: 'pencil',
+                meta: {
+                    enable: true,
+                },
                 component: CreatePost
             }
         ]
     },
     {
         path: '/users',
-        name: 'Utilisateurs',
+        name: 'users.list',
+        label: 'Users',
+        icon: 'user-circle',
+        meta: {
+            enable: true,
+        },
         component: Users
     },
 
