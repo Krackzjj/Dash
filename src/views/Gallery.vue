@@ -6,15 +6,15 @@ import { ref, watch } from 'vue';
 import BadgePicker, { type Filter } from '@/components/Inputs/BadgePicker.vue';
 import ImageCard from '@/components/ImageCard.vue';
 
-import _gallery from './popup/_gallery.vue';
+import _gallery from './popup/gallery/index.vue';
 
-import { useImg } from '@/composables/useImg';
+import { useGetImg } from '@/composables/useImg';
 
-const { data: imgs } = useImg()
+const { data: imgs, refetch } = useGetImg()
 
 
 interface SelectedImg {
-    id?: number;
+    id?: string;
     state?: boolean;
     selected?: boolean;
 }
@@ -22,7 +22,7 @@ interface SelectedImg {
 let selected = ref<SelectedImg[]>([])
 let allSelected = ref(false);
 
-let hoveredImg = (id: number, state: boolean) => {
+let hoveredImg = (id: string, state: boolean) => {
     let isRegister = selected.value.find((img) => img.id === id);
     if (!isRegister) {
         selected.value.push({ id: id, state: state });
@@ -30,7 +30,7 @@ let hoveredImg = (id: number, state: boolean) => {
         isRegister.state = state;
     }
 }
-let isHovered = (id: number) => {
+let isHovered = (id: string) => {
     let isSelected = selected.value.find((img) => img.id === id && img.selected === true);
     if (isSelected) {
         return isSelected.selected;
@@ -39,7 +39,7 @@ let isHovered = (id: number) => {
     }
 }
 
-let selectedImg = (mode?: 'uniq' | 'global', id?: number) => {
+let selectedImg = (mode?: 'uniq' | 'global', id?: string) => {
     if (imgs.value && mode === 'global') {
         imgs.value.forEach((img, index) => {
             selected.value[index] = { id: img.id, selected: !allSelected.value };
@@ -175,6 +175,7 @@ let toggle = () => {
             </ul>
         </nav>
         <main>
+            <div class="pin"><span>Total |</span><span>{{ imgs?.length }}</span> </div>
             <ul class="view-grid" v-if="view_type === 'grid'">
                 <li v-for="img in imgs" :key="img.id">
                     <ImageCard @mouseover="hoveredImg(img.id, true)" @mouseleave="hoveredImg(img.id, false)"
@@ -188,7 +189,7 @@ let toggle = () => {
             </ul>
         </main>
         <Modal ref="toggleModal">
-            <component :is="_gallery" :context="{ action: 'add' }" />
+            <component :is="_gallery" :context="{ action: 'add', callables: { toggle, refetch } }" />
         </Modal>
     </div>
 </template>
@@ -253,9 +254,34 @@ nav {
 }
 
 main {
+    .pin {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        font-size: 1rem;
+        width: fit-content;
+        padding-inline: .5rem;
+        padding-block: .2rem;
+        text-transform: uppercase;
+        padding: .5ch;
+        border: 2px solid var(--primary-color);
+        margin-left: 1rem;
+        margin-top: 1rem;
+
+        span:first-child {
+            letter-spacing: .5ch;
+            border-right: 1px solid white;
+        }
+
+        span:last-child {
+            letter-spacing: .2ch;
+            margin-left: 1ch;
+            font-weight: bold;
+        }
+    }
+
     display: flex;
     flex-direction: column;
-    gap: 1rem;
     min-height: 100vh;
     max-height: 100vh;
     overflow-y: hidden;

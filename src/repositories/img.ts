@@ -8,3 +8,7 @@ export async function get() {
     return z.array(imgSchema).parse(data)
 }
 
+export async function post(DTO: Record<string, any>) {
+    const response = await fetch(`${BASE_URL}/img`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(DTO) })
+}
+

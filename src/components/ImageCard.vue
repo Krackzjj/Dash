@@ -2,6 +2,7 @@
 import { toRefs, computed } from 'vue'
 import { Colors } from '@/types/Components/ColorType';
 
+
 interface Props {
     src: string
     type?: string
@@ -38,7 +39,8 @@ const classes = computed(() => ({
     <div :class="classes" v-bind="$attrs" :style="style">
         <slot />
         <div class="card-legend">
-            <span v-if="title" class="card-title">{{ title.substring(0, 12) + '...' }}</span>
+            <span v-if="title" class="card-title">{{ title && title.length > 11 ? title.substring(0, 10) + "..." : title
+            }}</span>
             <div v-if="type || dimensions" class="card-spec">
                 <span class="card-spec-type">{{ type }}</span>
                 <span class="card-spec-dim">{{ dimensions }}</span>

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+
+import { type Rules } from '@/types/Components/InputsValidation/Text';
+
 const props = defineProps<{
     label?: string
-    maxLength?: string
+    rules?: Rules
     indicator?: boolean
 }>()
 const textarea = ref<HTMLElement>()
 
-const text = ref<string | undefined>('')
+const text = ref<string | undefined>()
 const count = ref<number | undefined>()
 
 const emit = defineEmits<{
@@ -20,8 +23,14 @@ const emit = defineEmits<{
 
 const errors = computed(() => {
     let errors: string[] = []
-    if (count.value === 0 || props.maxLength && count.value && count.value > parseInt(props.maxLength)) {
-        errors = [...errors, `Le nombre de caractères doit être compris entre 1 et ${props.maxLength}.`]
+    if (props.rules?.required && text.value === '') {
+        errors = [...errors, 'le champs est requis']
+    }
+    if (props.rules?.maxLength && count.value && count.value > props.rules.maxLength) {
+        errors = [...errors, `le champs ne doit pas dépasser ${props.rules.maxLength} caractères`]
+    }
+    if (props.rules?.minLength && count.value && count.value < props.rules.minLength) {
+        errors = [...errors, `le champs doit contenir au moins ${props.rules.minLength} caractères`]
     }
     return errors
 })
@@ -29,7 +38,7 @@ const errors = computed(() => {
 let handleValue = (event: Event) => {
     let target = event.target as HTMLElement
     text.value = target.innerText
-    if (target.innerText === '') {
+    if (target.innerText === '' || text.value === '\n') {
         count.value = 0
         emit('handleText', { text: '', errors: errors.value })
     } else {
@@ -39,9 +48,11 @@ let handleValue = (event: Event) => {
 }
 
 const classes = computed(() => {
+    let maxLength = props.rules?.maxLength
+    let minLength = props.rules?.minLength
+    let required = props.rules?.required
     return {
-        ['border-danger[i]']: count.value && count.value > 160,
-        ['border-success[i]']: count.value && count.value <= 160 && count.value > 0,
+        ['border-danger[i]']: maxLength && count.value && count.value > maxLength || minLength && count.value && count.value < minLength || required && (text.value === '' || text.value === '\n' || text.value === '&nbsp;')
     }
 })
 
@@ -49,14 +60,15 @@ const classes = computed(() => {
 
 <template>
     <div class="textarea-container">
-        <label v-if="props.label" :for="props.label">{{ label }}</label>
+        <label v-if="props.label" :for="props.label">{{ label }}<span v-if="props.rules?.required"
+                class="text-danger">*</span></label>
         <div class="textarea-group">
             <div ref="textarea" class="textarea" :class="classes" v-bind="$attrs" :name="props.label"
                 :contenteditable="true" @input="handleValue($event)">
             </div>
-            <p v-if="props.maxLength" class="count"><span
-                    :class="`text-${count && parseInt(props.maxLength) < count ? 'danger bold' : 'success'}`">{{ count
-                    }}</span>/{{ props.maxLength }} caractères</p>
+            <p v-if="props.rules?.maxLength" class="count"><span
+                    :class="`text-${count && props.rules.maxLength < count ? 'danger bold' : 'success'}`">{{ count
+                    }}</span>/{{ props.rules.maxLength }} caractères</p>
         </div>
         <div class="text-danger text-xs" v-if="props.indicator">
             <p v-for="error in errors">{{ error }}</p>
@@ -93,6 +105,14 @@ const classes = computed(() => {
 
 .textarea-group {
     position: relative;
+}
+
+.textarea-placeholder {
+    font-size: 0.8rem;
+    color: #ccc;
+    position: absolute;
+    user-select: none;
+
 }
 
 .count {
