@@ -4,7 +4,7 @@ import Badge from '../Badge.vue';
 
 export type Filter = {
     type: string;
-    number: number;
+    count: number;
 }
 interface Props {
     label?: string
@@ -33,14 +33,12 @@ let selectedOpt = ref<number[]>([])
     <div>
         <h4 v-if="props.label">{{ props.label }}</h4>
         <div class="opts">
-            <Suspense>
-                <Badge class="opt" v-for="opt, index in props.opts" :key="index" :backgroundColor="opt.type"
-                    :class="`${selectedOpt?.includes(index) ? 'opt-active' : ''}`" @click="handleClick(index)">{{ opt.type
-                    }}
-                    <i>({{
-                        opt.number }})</i>
-                </Badge>
-            </Suspense>
+            <Badge class="opt" v-for="opt, index in props.opts" :key="index" :backgroundColor="opt.type"
+                :class="`${selectedOpt?.includes(index) ? 'opt-active' : ''}`" @click="handleClick(index)">{{ opt.type
+                }}
+                <i>({{
+                    opt.count }})</i>
+            </Badge>
         </div>
     </div>
 </template>

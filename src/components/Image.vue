@@ -1,6 +1,7 @@
 <script setup lang="ts">
+
 import { toRefs, computed } from 'vue'
-import { Colors } from '@/types/Components/ColorType';
+import { Colors } from '@/types/Components/General';
 
 
 interface Props {
@@ -10,10 +11,11 @@ interface Props {
     title?: string
     border?: string
     clickable?: boolean
+    fake?: boolean
 }
 let props = defineProps<Props>()
 
-const { src, type, title, border, clickable } = toRefs(props)
+const { src, type, title, border, clickable, fake } = toRefs(props)
 
 const style = {
     backgroundImage: `url(${src.value})`
@@ -32,19 +34,23 @@ const classes = computed(() => ({
     'img-clickable': clickable.value
 }))
 
-
 </script>
 
 <template>
     <div :class="classes" v-bind="$attrs" :style="style">
-        <slot />
-        <div class="card-legend">
-            <span v-if="title" class="card-title">{{ title && title.length > 11 ? title.substring(0, 10) + "..." : title
-            }}</span>
-            <div v-if="type || dimensions" class="card-spec">
-                <span class="card-spec-type">{{ type }}</span>
-                <span class="card-spec-dim">{{ dimensions }}</span>
+        <div class="card-container" v-if="fake">
+            <slot />
+            <div class="card-legend">
+                <span v-if="title" class="card-title">{{ title && title.length > 11 ? title.substring(0, 10) + "..." : title
+                }}</span>
+                <div v-if="type || dimensions" class="card-spec">
+                    <span class="card-spec-type">{{ type }}</span>
+                    <span class="card-spec-dim">{{ dimensions }}</span>
+                </div>
             </div>
+        </div>
+        <div v-else>
+            <img :class="classes" v-bind="$attrs" :src="src" class="card-container" />
         </div>
     </div>
 </template>
@@ -54,7 +60,6 @@ const classes = computed(() => ({
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    align-items: center;
     width: 100%;
     height: 100%;
     background-size: cover;
@@ -108,4 +113,4 @@ const classes = computed(() => ({
 .img-clickable {
     cursor: pointer;
 }
-</style>
+</style>@/types/Components/General

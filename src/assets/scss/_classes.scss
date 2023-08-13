@@ -149,11 +149,48 @@ $value in $colors {
         }
     }
 
+    .border {
+        border: 1px solid;
+    }
+
     .border-#{$color} {
         border-color: $value;
 
         &\[i\] {
             border-color: $value !important;
+        }
+
+    }
+
+    .border-b-#{$color} {
+        border-bottom-color: $value;
+
+        &\[i\] {
+            border-bottom-color: $value !important;
+        }
+    }
+
+    .border-t-#{$color} {
+        border-top-color: $value;
+
+        &\[i\] {
+            border-top-color: $value !important;
+        }
+    }
+
+    .border-r-#{$color} {
+        border-right-color: $value;
+
+        &\[i\] {
+            border-right-color: $value !important;
+        }
+    }
+
+    .border-l-#{$color} {
+        border-left-color: $value;
+
+        &\[i\] {
+            border-left-color: $value !important;
         }
     }
 }
@@ -168,6 +205,8 @@ $value in $font-sizes {
         }
     }
 }
+
+
 
 
 .w-full {
@@ -188,10 +227,24 @@ $value in $font-sizes {
     &-wrap {
         flex-wrap: wrap;
     }
+
+    &-end {
+        justify-content: flex-end;
+    }
 }
 
-.align-center {
-    align-items: center;
+
+
+.align {
+    &-center {
+        align-items: center;
+    }
+
+    &-self {
+        &-end {
+            align-self: flex-end;
+        }
+    }
 }
 
 .bold {

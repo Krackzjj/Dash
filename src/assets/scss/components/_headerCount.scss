@@ -1,0 +1,32 @@
+.header-counter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1rem;
+    width: fit-content;
+    padding-inline: .5rem;
+    padding-block: .2rem;
+    text-transform: uppercase;
+    padding: .5ch;
+    border: 2px solid transparent;
+    margin-left: 1rem;
+    margin-top: 1rem;
+
+    span:first-child {
+        letter-spacing: .5ch;
+        border-right: 1px solid white;
+    }
+
+    span:last-child {
+        letter-spacing: .2ch;
+        margin-left: 1ch;
+        font-weight: bold;
+    }
+}
+
+@each $color,
+$value in $colors {
+    .header-counter-#{$color} {
+        border-color: $value;
+    }
+}

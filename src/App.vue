@@ -34,14 +34,18 @@ import LateralBar from '@/components/layout/LateralBar.vue';
   width: 100vw;
 }
 
+.main-container {
+  display: flex;
+}
 
 main {
   display: grid;
-  grid-template-columns: .5fr 5fr;
+  width: 100vw;
+  grid-template-columns: 10vw 5fr;
   height: 100vh;
 
   #lateral {
-    z-index: 1000;
+    z-index: 100;
   }
 }
 </style>

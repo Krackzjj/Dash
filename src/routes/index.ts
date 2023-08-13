@@ -2,7 +2,7 @@ import Home from '@/views/Home.vue'
 import Users from '@/views/Users.vue'
 import Posts from '@/views/Posts.vue'
 import CreatePost from '@/views/CreatePost.vue'
-import Gallery from '@/views/Gallery.vue'
+import Gallery from '@/views/Gallery/Gallery.vue'
 import { Route } from '@/types/Router/Routes'
 
 

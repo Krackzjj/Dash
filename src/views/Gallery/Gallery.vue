@@ -4,13 +4,18 @@ import _ from 'lodash';
 import { ref, watch } from 'vue';
 
 import BadgePicker, { type Filter } from '@/components/Inputs/BadgePicker.vue';
-import ImageCard from '@/components/ImageCard.vue';
 
-import _gallery from './popup/gallery/index.vue';
+import { type imgType } from '@/schema/ImgSchema';
+
+import _gallery from '../popup/gallery/index.vue';
+import _trash from './_trash.vue';
+import ZoomBOX from '@/components/ZoomBOX.vue';
+import Dialog from '@/components/Dialog.vue';
 
 import { useGetImg } from '@/composables/useImg';
+import HeaderCounter from '@/components/HeaderCounter.vue';
 
-const { data: imgs, refetch } = useGetImg()
+const { data: imgs, isSuccess } = useGetImg()
 
 
 interface SelectedImg {
@@ -58,13 +63,16 @@ let selectedImg = (mode?: 'uniq' | 'global', id?: string) => {
 
 const view_type = ref<string>('grid')
 
-const toolBarSize = ref<string>('60px')
+const toolBarSize = ref<'minify' | 'maxify'>('minify')
 const toolBarState = ref<boolean>(false)
 let handleToolbar = () => {
     toolBarState.value = !toolBarState.value
-    setTimeout(() => {
-        toolBarSize.value = toolBarSize.value === '300px' ? '60px' : '300px'
-    }, 10)
+    if (toolBarState.value === true) {
+        toolBarSize.value = 'maxify'
+    }
+    if (toolBarState.value === false) {
+        toolBarSize.value = 'minify'
+    }
 }
 
 let updateView = (view: string) => {
@@ -73,18 +81,33 @@ let updateView = (view: string) => {
 
 const filters = ref<Filter[]>()
 
-watch(() => imgs.value, (newVal) => {
-    if (newVal) {
-        let types = [...new Set(newVal.map((img) => img.type))]
-        let filters_ = types.map((type) => {
-            return {
-                type: type,
-                number: newVal.filter((img) => img.type === type).length
-            }
-        })
-        filters.value = filters_
+function checkType(array: imgType[]) {
+    let types: string[] = []
+    array.forEach((img) => {
+        if (img.type) {
+            types.push(img.type)
+        }
+    })
+    let count = _.countBy(types)
+    let result = Object.keys(count).map((key) => {
+        return { type: key, count: count[key] }
+    })
+    return result
+}
+
+watch(imgs, (value) => {
+    if (value) {
+        filters.value = checkType(value)
     }
 })
+
+let $dialog = ref()
+let $imgElement = ref()
+
+let zoom = (path: string) => {
+    $imgElement.value.$src = path
+    $imgElement.value.zoom()
+}
 
 let toggleModal = ref()
 let toggle = () => {
@@ -92,11 +115,32 @@ let toggle = () => {
 }
 
 
+const selectedAction = ref<{ action: { type: string, name: string }, selected: imgType[] }>({
+    action: { type: '', name: '' },
+    selected: []
+})
+let deleteImg = () => {
+    $dialog.value.dialog.open()
+    if (selected.value.some(el => el.selected === true)) {
+        let selecteds = selected.value.filter((el) => el.selected === true)
+        if (imgs.value) {
+            let selectedImgs = imgs.value.filter((img) => selecteds.some((el) => el.id === img.id))
+            selectedAction.value = { action: { type: 'danger', name: "delete" }, selected: selectedImgs }
+        }
+
+
+    } else {
+        return
+    }
+}
+
 
 </script>
 <template>
     <div class="container">
-        <nav :id="toolBarState ? 'translate-to-right' : 'translate-to-left'">
+        <Dialog ref="$dialog" :name="selectedAction?.action.name" :type="selectedAction?.action.type"
+            :data="selectedAction?.selected" />
+        <nav :class="toolBarSize">
             <ul class="tools">
                 <li>
                     <div v-if="toolBarState" class="shrink">
@@ -130,11 +174,11 @@ let toggle = () => {
                         </template>
                     </Button>
                     <div class="flex flex-wrap gap-[0.5] mt-2" v-if="toolBarState">
-                        <Button hollow icon="plus" label="Ajouter" @click="toggle" />
+                        <Button hollow icon="plus" label="Ajouter" @click="[toggle(), view_type = 'grid']" />
                         <Button hollow icon="pencil" label="Modifier"
                             :disabled="!selected.some(el => el.selected === true)" />
-                        <Button hollow icon="trash" label="Supprimer"
-                            :disabled="!selected.some(el => el.selected === true)" />
+                        <Button hollow icon="trash" label="Supprimer" :disabled="!selected.some(el => el.selected === true)"
+                            @click="deleteImg" />
                     </div>
                 </li>
                 <li>
@@ -157,8 +201,28 @@ let toggle = () => {
                             <i class="icon-filter"></i>
                         </template>
                     </Button>
+                    <div v-if="toolBarState && (filters && filters.length > 0)">
+                        <BadgePicker v-if="filters" :opts="filters" />
+                    </div>
+                </li>
+                <li>
+                    <h4 v-if="toolBarState">Trier</h4>
+                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                        <template #icon>
+                            <i class="icon-sort-asc"></i>
+                        </template>
+                    </Button>
+                </li>
+                <li>
+                    <h4 v-if="toolBarState">Corbeille</h4>
+                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                        <template #icon>
+                            <i class="icon-trash"></i>
+                        </template>
+                    </Button>
                     <div v-if="toolBarState">
-                        <BadgePicker :opts="filters" />
+                        <Button class="mt-2" :hollow="view_type !== 'trash'" icon="eye" label="Afficher la corbeille"
+                            @click="view_type = 'trash'" />
                     </div>
                 </li>
                 <li>
@@ -174,40 +238,48 @@ let toggle = () => {
                 </li>
             </ul>
         </nav>
-        <main>
-            <div class="pin"><span>Total |</span><span>{{ imgs?.length }}</span> </div>
-            <ul class="view-grid" v-if="view_type === 'grid'">
-                <li v-for="img in imgs" :key="img.id">
-                    <ImageCard @mouseover="hoveredImg(img.id, true)" @mouseleave="hoveredImg(img.id, false)"
-                        @click="selectedImg('uniq', img.id)" class="card" clickable :border="img.type" :type="img.type"
+        <main v-if="view_type !== 'trash'">
+            <HeaderCounter :count="imgs?.length ?? 0" label="total" />
+            <ul class="view-grid">
+                <li v-if="(imgs && imgs.length > 0) && isSuccess" v-for="img in imgs" :key="img.id">
+                    <Image @click.stop="zoom(img.path)" fake @mouseover="hoveredImg(img.id, true)"
+                        @mouseleave="hoveredImg(img.id, false)" class="card" clickable :border="img.type" :type="img.type"
                         :src="img.path" :dimensions="img.dimensions" :title="img.name">
                         <div v-show="isHovered(img.id)" @click.stop="selectedImg('uniq', img.id)"
                             :class="`cercle ${selected.find(el => el.id === img.id)?.selected === true ? 'selected' : ''}`">
                         </div>
-                    </ImageCard>
+                    </Image>
                 </li>
+                <li v-else>Nothing Here...</li>
+
             </ul>
         </main>
+        <main v-if="view_type === 'trash'">
+            <component :is="_trash" />
+        </main>
         <Modal ref="toggleModal">
-            <component :is="_gallery" :context="{ action: 'add', callables: { toggle, refetch } }" />
+            <component :is="_gallery" :context="{ action: 'add', callables: { toggle } }" />
         </Modal>
+        <ZoomBOX ref="$imgElement" />
     </div>
 </template>
 <style scoped lang="scss">
 .container {
-    display: grid;
-    grid-template-columns: v-bind(toolBarSize) 1fr;
+    display: flex;
+    width: calc(100vw - 10vw);
 }
 
 nav {
-    height: 100%;
+    min-height: 100%;
     padding: .5rem;
     background-color: whitesmoke;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
-
-
+.maxify {
+    min-width: 20vw;
+    max-width: 20vw;
+}
 
 .shrink {
     display: flex;
@@ -221,66 +293,10 @@ nav {
     gap: 1rem;
 }
 
-#translate-to-right {
-    animation: slide 0.2s ease-in forwards;
-}
-
-#translate-to-left {
-    animation: slideleft 0.2s ease-out forwards;
-}
-
-@keyframes slide {
-    0% {
-        transform: translateX(-50px);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideleft {
-    0% {
-        transform: translateX(0px);
-    }
-
-    50% {
-        transform: translateX(-10px);
-    }
-
-    100% {
-        transform: translateX(0px);
-    }
-}
-
 main {
-    .pin {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        font-size: 1rem;
-        width: fit-content;
-        padding-inline: .5rem;
-        padding-block: .2rem;
-        text-transform: uppercase;
-        padding: .5ch;
-        border: 2px solid var(--primary-color);
-        margin-left: 1rem;
-        margin-top: 1rem;
-
-        span:first-child {
-            letter-spacing: .5ch;
-            border-right: 1px solid white;
-        }
-
-        span:last-child {
-            letter-spacing: .2ch;
-            margin-left: 1ch;
-            font-weight: bold;
-        }
-    }
 
     display: flex;
+    width: 100%;
     flex-direction: column;
     min-height: 100vh;
     max-height: 100vh;

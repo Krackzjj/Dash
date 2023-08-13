@@ -41,13 +41,13 @@ defineExpose({ toggle });
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    z-index: 101;
 }
 
 .container {
     position: relative;
-    width: 50%;
     height: fit-content;
-    max-height: 80vh;
+    width: 50vw;
     background-color: white;
     border-radius: 5px;
     overflow: auto;
@@ -57,10 +57,12 @@ defineExpose({ toggle });
 }
 
 .content {
-    flex-grow: 1;
+    max-width: 100%;
+    max-height: 100%;
 
     .inner-content {
-        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
     }
 }
 

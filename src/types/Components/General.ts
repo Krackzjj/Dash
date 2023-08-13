@@ -1,3 +1,6 @@
+export type NameColorType = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
+export type Sizes = 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
+
 export type Colors = {
     [key: string]: string
 }

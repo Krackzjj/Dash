@@ -5,11 +5,12 @@ import { VueQueryPlugin } from '@tanstack/vue-query';
 
 import routes from '@/routes/Router';
 
+import { vClickOutside } from '@/directives/v-outside';
+
 import Button from '@/components/Inputs/Button.vue';
 import InputText from '@/components/Inputs/InputText.vue';
 import Link from '@/components/Link.vue';
-import Img from '@/components/Img.vue';
-import Card from '@/components/Card.vue';
+import Image from '@/components/Image.vue';
 import Modal from '@/components/layout/Modal.vue';
 import Form from '@/components/Form.vue';
 
@@ -27,11 +28,12 @@ const app = createApp(App)
 
 app.component('Button', Button)
 app.component('InputText', InputText)
-app.component('Card', Card)
 app.component('Modal', Modal)
-app.component('Img', Img)
+app.component('Image', Image)
 app.component('Form', Form)
 app.component('Link', Link)
+
+app.directive('outside', vClickOutside)
 
 app.use(pinia)
 app.use(VueQueryPlugin)

@@ -1,22 +1,19 @@
 <script setup lang="ts">
 import { ref, toRefs } from 'vue'
 
-import { imgSchemaType } from '@/schema/ImgSchema';
-import { IMG_TYPES } from '@/types/general';
+import { imgType } from '@/schema/ImgSchema';
 
 import { nanoid } from 'nanoid'
-import { post } from '@/repositories/img.ts'
-import { useMutation } from '@tanstack/vue-query';
+import { usePostImg } from '@/composables/useImg';
 
 import url from './_url.vue';
 
 type context = {
     callables: {
         toggle: () => void
-        refetch: () => void
     }
     action: 'add' | 'edit'
-    subject?: imgSchemaType
+    subject?: imgType
 }
 
 const props = defineProps<{
@@ -26,10 +23,7 @@ const props = defineProps<{
 
 const { context } = toRefs(props)
 
-const { mutate } = useMutation({
-    mutationKey: ['addImg'],
-    mutationFn: (dto: imgSchemaType) => post(dto),
-})
+const { mutate } = usePostImg()
 
 
 const choice = ref(false)
@@ -44,19 +38,21 @@ type DTO = {
 
 const handleDTO = (dto: DTO) => {
     if (context.value.action === 'add') {
-        const newDTO: imgSchemaType = {
+        let type = dto.url.split('.').pop()
+
+
+        const newDTO: Partial<imgType> = {
             id: nanoid(),
             name: dto.name,
             path: dto.url,
-            type: dto.url.split('.').pop() as keyof typeof IMG_TYPES,
-            external: dto.external ? 1 : 0,
+            type: type as string,
+            external: dto.external,
             dimensions: dto.dimensions,
             description: dto.description,
-            published: 0
+            published: false
         }
         mutate(newDTO, {
             onSuccess: () => {
-                context.value.callables.refetch()
                 context.value.callables.toggle()
             },
             onError: () => {
@@ -71,7 +67,7 @@ const handleDTO = (dto: DTO) => {
 </script>
 
 <template>
-    <div class="container">
+    <div>
         <h2>{{ context.action }} une image</h2>
         <div class="choice-maker">
             <Button :hollow="choice" @click="choice = !choice">Via URL</Button>
@@ -82,7 +78,8 @@ const handleDTO = (dto: DTO) => {
 </template>
 
 <style scoped lang="scss">
-.container {
+div:first-child {
+    width: 100%;
     padding: 2rem;
     display: flex;
     flex-direction: column;

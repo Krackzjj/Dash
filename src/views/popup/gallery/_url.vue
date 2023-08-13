@@ -4,8 +4,7 @@ import { computed, ref } from 'vue';
 import InputText from '@/components/Inputs/InputText.vue';
 import Textarea from '@/components/Inputs/TextArea.vue';
 
-
-import { IMG_TYPES } from '@/types/general.ts';
+import { IMG_TYPES } from '@/schema/ImgSchema';
 
 const emit = defineEmits<{
     addbyURL: [value: {
@@ -37,7 +36,7 @@ const handleAdd = () => {
         ...DTO.value,
         name: name.value || name_,
         description: description_,
-        dimensions: dimensions.value,
+        dimensions: dimensions.value || 'undefined',
         url: url.value
     }
     if (!DTO.value.url) return
@@ -78,6 +77,7 @@ let checkDims = (url: string) => {
     }
 }
 
+
 </script>
 
 <template>
@@ -88,8 +88,7 @@ let checkDims = (url: string) => {
             <div class="img-inputs">
                 <InputText label="Nom" placeholder="Nom de l'image" indicator
                     :rules="{ default: url?.split('/').pop()?.split('.')[0] }" v-model="name" />
-                <Textarea label="Description" :rules="{ maxLength: 160 }" width="700px" @handleText="handleText"
-                    indicator />
+                <Textarea label="Description" :rules="{ maxLength: 160 }" @handleText="handleText" indicator />
                 <Button @click="handleAdd" :disabled="url_valid.state === false">Ajouter</Button>
             </div>
 
@@ -102,6 +101,7 @@ let checkDims = (url: string) => {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
 }
 
 .img {
@@ -120,10 +120,10 @@ let checkDims = (url: string) => {
     }
 
     &-inputs {
-        flex-grow: 1;
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        width: 100%;
     }
 
 }

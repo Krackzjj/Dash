@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue';
-import { Colors } from '@/types/Components/ColorType';
+import { Colors } from '@/types/Components/General';
 const props = defineProps<{
     backgroundColor: string
 }>()
@@ -38,4 +38,4 @@ span {
     letter-spacing: .05ch;
     background-color: v-bind(thisBackground);
 }
-</style>
+</style>@/types/Components/General

@@ -1,4 +1,4 @@
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 export function addTime(add: string, date: number = new Date().getTime()) {
     const [hours, minutes, second] = add.split(':');
@@ -11,8 +11,8 @@ export function subTime(remove: string, date: number = new Date().getTime()) {
     return newDate;
 }
 
-export function formatTime(date: number = new Date().getTime()) {
-    return dayjs(date).format('HH:mm:ss');
+export function formatToHuman(date: Date, format: string = 'YYYY-MM-DD') {
+    return dayjs(date).format(format);
 }
 
 export function formatDate(date: number = new Date().getTime()) {

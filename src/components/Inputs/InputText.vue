@@ -6,6 +6,9 @@ interface Props {
     label: string
     indicator?: boolean
     rules?: Rules
+    opts?: {
+        [key: string]: boolean
+    }
 }
 
 const props = defineProps<Props>()
