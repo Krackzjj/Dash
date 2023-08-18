@@ -3,7 +3,7 @@ import { toRefs, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 
 interface Props {
-    to: string;
+    to: string | { name: string, params?: any };
     icon?: (string | undefined) | (string | undefined)[];
     label?: string;
 }

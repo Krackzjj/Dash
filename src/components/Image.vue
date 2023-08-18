@@ -37,7 +37,7 @@ const classes = computed(() => ({
 </script>
 
 <template>
-    <div :class="classes" v-bind="$attrs" :style="style">
+    <div :class="classes" v-bind="{ ...$attrs }" :style="style">
         <div class="card-container" v-if="fake">
             <slot />
             <div class="card-legend">
@@ -45,12 +45,13 @@ const classes = computed(() => ({
                 }}</span>
                 <div v-if="type || dimensions" class="card-spec">
                     <span class="card-spec-type">{{ type }}</span>
-                    <span class="card-spec-dim">{{ dimensions }}</span>
+                    <span class="card-spec-dim">{{ dimensions && dimensions?.length >= 10 ? dimensions?.substring(0, 10)
+                        + '...' : dimensions }}</span>
                 </div>
             </div>
         </div>
         <div v-else>
-            <img :class="classes" v-bind="$attrs" :src="src" class="card-container" />
+            <img :class="classes" v-bind="{ ...$attrs }" :src="src" class="card-container" />
         </div>
     </div>
 </template>
@@ -102,7 +103,7 @@ const classes = computed(() => ({
     }
 
     .card-title {
-        font-family: 'The-Bold-Font', sans-serif;
+        font-family: 'Visage Bold';
         color: white;
         font-size: 2rem;
         line-height: 1.5rem;

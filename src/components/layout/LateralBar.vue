@@ -1,16 +1,26 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import Link from '@/components/Link.vue';
+import { useRoute } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router'
 
-import { Route } from '@/types/Router/Routes';
+// import { Route } from '@/types/Router/Routes';
 
-
+const routes = useRoute()
 const props = defineProps<{
-    routes: Route[];
+    routes: RouteRecordRaw[]
+    ;
 }>()
 
-
-
-
+const isActive = computed(() => (r: RouteRecordRaw) => {
+    return routes.name === r.name || routes.redirectedFrom?.name === r.name || routes.matched.some(m => m.name === r.name)
+})
+const isOpen = ref(false)
+const toggleOpen = (r: RouteRecordRaw) => {
+    if (!r.children) return
+    if (!r.children.some(c => c.meta?.visible)) return
+    isOpen.value = !isOpen.value
+}
 </script>
 <template>
     <nav>
@@ -19,17 +29,19 @@ const props = defineProps<{
             <a href="#">Author</a>
         </div>
         <div class="main-nav">
-            <template v-for="route in props.routes" :key="route.name">
-                <Link v-if="route.meta.enable" class="navLink" :class="$route.path === route.path ? 'active' : ''"
-                    :to="route.path"
-                    :icon="route.children && route.children?.map(child => child.meta.enable).length > 1 ? ['chevron-right', route.icon] : route.icon"
-                    :label="route.label">
+            <template v-for="r in   props.routes  " :key="r.name">
+                <Link :to="{ name: r.name as string }" class="navLink" :class="{ active: isActive(r) }"
+                    :icon="r.children ? [(r.children?.some(c => c.meta?.visible) ? (isOpen ? 'chevron-down' : 'chevron-right') : ''), r.meta?.icon as string] : (r.meta?.icon as string)"
+                    @click="toggleOpen(r)">
+                {{ r.meta?.label }}
                 </Link>
-                <template v-if="route.meta.enable && route.children">
-                    <template v-for="child in route.children" :key="child.name">
-                        <Link v-if="child.meta.enable && $route.path.includes(route.path)" class="navLink navLink-child"
-                            :class="$route.path.includes(child.path) ? 'active' : ''" :to="child.path" :icon="child.icon"
-                            :label="child.label" />
+                {{ r.meta?.state }}
+                <template v-if="isOpen">
+                    <template v-for="c in r.children" :key="c.name">
+                        <Link :to="{ name: c.name as string }" class="navLink navLink-child"
+                            :class="{ active: isActive(c) }" :icon="(c.meta?.icon as string)">
+                        {{ c.meta?.label }}
+                        </Link>
                     </template>
                 </template>
             </template>
@@ -61,7 +73,6 @@ nav {
 
         &.navLink-child {
             padding-left: 2rem;
-            padding-block: .2rem;
         }
     }
 }

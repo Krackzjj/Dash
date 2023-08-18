@@ -48,6 +48,7 @@ defineExpose({ toggle });
     position: relative;
     height: fit-content;
     width: 50vw;
+    min-height: 50vh;
     background-color: white;
     border-radius: 5px;
     overflow: auto;

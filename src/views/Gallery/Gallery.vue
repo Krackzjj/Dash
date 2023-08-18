@@ -1,71 +1,43 @@
 <script setup lang="ts">
+import { useStore } from '@/store';
 import _ from 'lodash';
-
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 import BadgePicker, { type Filter } from '@/components/Inputs/BadgePicker.vue';
 
-import { type imgType } from '@/schema/ImgSchema';
-
 import _gallery from '../popup/gallery/index.vue';
-import _trash from './_trash.vue';
-import ZoomBOX from '@/components/ZoomBOX.vue';
-import Dialog from '@/components/Dialog.vue';
 
-import { useGetImg } from '@/composables/useImg';
-import HeaderCounter from '@/components/HeaderCounter.vue';
+import { useDeleteImg } from '@/composables/useImg';
+import { onMounted } from 'vue';
 
-const { data: imgs, isSuccess } = useGetImg()
+const { SET_CURRENT_VIEW, lastGalleryView } = useStore()
+
+const router = useRouter()
+const route = useRoute()
+
+SET_CURRENT_VIEW(route.name as string, route.params as any)
+
+const { mutate } = useDeleteImg()
+
+const $component = ref()
+const selected = ref<{ id: string, name: string }[]>([])
+const filters = ref<Filter[]>()
 
 
-interface SelectedImg {
-    id?: string;
-    state?: boolean;
-    selected?: boolean;
+const handleSelectAll = () => {
+    selected.value.length <= 0 ? $component.value.select('global') : $component.value.select('none')
 }
-
-let selected = ref<SelectedImg[]>([])
-let allSelected = ref(false);
-
-let hoveredImg = (id: string, state: boolean) => {
-    let isRegister = selected.value.find((img) => img.id === id);
-    if (!isRegister) {
-        selected.value.push({ id: id, state: state });
-    } else {
-        isRegister.state = state;
-    }
+const handleSelect = <T extends string>(item: { id: T, name: T }[]) => {
+    selected.value = [...item]
 }
-let isHovered = (id: string) => {
-    let isSelected = selected.value.find((img) => img.id === id && img.selected === true);
-    if (isSelected) {
-        return isSelected.selected;
-    } else {
-        return selected.value.find((img) => img.id === id)?.state;
-    }
+const handleFilters = (filter: Filter[]) => {
+    filters.value = [...filter]
 }
-
-let selectedImg = (mode?: 'uniq' | 'global', id?: string) => {
-    if (imgs.value && mode === 'global') {
-        imgs.value.forEach((img, index) => {
-            selected.value[index] = { id: img.id, selected: !allSelected.value };
-        });
-        allSelected.value = !allSelected.value;
-    } else {
-        let isRegister = selected.value.find((img) => img.id === id);
-        if (!isRegister) {
-            selected.value.push({ id: id, selected: true });
-        } else {
-            isRegister.selected = !isRegister.selected;
-        }
-    }
-}
-
-
-const view_type = ref<string>('grid')
 
 const toolBarSize = ref<'minify' | 'maxify'>('minify')
 const toolBarState = ref<boolean>(false)
-let handleToolbar = () => {
+const handleToolbar = () => {
     toolBarState.value = !toolBarState.value
     if (toolBarState.value === true) {
         toolBarSize.value = 'maxify'
@@ -75,205 +47,253 @@ let handleToolbar = () => {
     }
 }
 
-let updateView = (view: string) => {
-    view_type.value = view
-}
+const updateView = <T extends string, K>(view: T, params?: K) => {
+    let name = `gallery.${view}`
+    let params_ = { ...params }
 
-const filters = ref<Filter[]>()
-
-function checkType(array: imgType[]) {
-    let types: string[] = []
-    array.forEach((img) => {
-        if (img.type) {
-            types.push(img.type)
-        }
-    })
-    let count = _.countBy(types)
-    let result = Object.keys(count).map((key) => {
-        return { type: key, count: count[key] }
-    })
-    return result
-}
-
-watch(imgs, (value) => {
-    if (value) {
-        filters.value = checkType(value)
+    if (route.name === 'gallery.trash') {
+        name = lastGalleryView.name as string
+        params_ = { view: lastGalleryView.params.view }
     }
-})
 
-let $dialog = ref()
-let $imgElement = ref()
-
-let zoom = (path: string) => {
-    $imgElement.value.$src = path
-    $imgElement.value.zoom()
+    router.push({ name, params: params_ })
 }
 
-let toggleModal = ref()
-let toggle = () => {
+const modal_context = ref<'edit' | 'add'>()
+const changeModal = (modal: 'edit' | 'add') => {
+    modal_context.value = modal
+}
+
+const $dialog = ref()
+
+const toggleModal = ref()
+const toggle = () => {
     toggleModal.value.toggle()
 }
 
+type DialogData = {
+    opts: { type: string, description: string, validation: boolean, name: string },
+    selected: { id: string, name: string }[]
+}
 
-const selectedAction = ref<{ action: { type: string, name: string }, selected: imgType[] }>({
-    action: { type: '', name: '' },
-    selected: []
-})
-let deleteImg = () => {
-    $dialog.value.dialog.open()
-    if (selected.value.some(el => el.selected === true)) {
-        let selecteds = selected.value.filter((el) => el.selected === true)
-        if (imgs.value) {
-            let selectedImgs = imgs.value.filter((img) => selecteds.some((el) => el.id === img.id))
-            selectedAction.value = { action: { type: 'danger', name: "delete" }, selected: selectedImgs }
+const selectedAction = ref<DialogData>()
+const handleDeleteImg = () => {
+    if (selected.value.length > 0) {
+        selectedAction.value = {
+            opts: {
+                type: 'danger',
+                name: 'Suppression définitive',
+                description: 'Le(s) élément suivant seront placer dans la corbeille',
+                validation: true,
+            },
+            selected: selected.value
         }
-
+        $dialog.value.dialog.open()
 
     } else {
         return
     }
 }
 
+const handleDialogReply = (reply: boolean) => {
+    if (reply) {
+        if (selected.value.length > 0) {
+            mutate(selected.value.map(item => item.id))
+            updateView('trash')
+        }
+    } else {
+        return
+    }
+}
 
+onMounted(() => {
+    SET_CURRENT_VIEW('gallery.view', 'grid')
+})
 </script>
+
 <template>
     <div class="container">
-        <Dialog ref="$dialog" :name="selectedAction?.action.name" :type="selectedAction?.action.type"
-            :data="selectedAction?.selected" />
+        <Dialog ref="$dialog" :opts="selectedAction?.opts" :data="selectedAction?.selected" @reply="handleDialogReply">
+            <template #title="{ slotProps }">
+                <h3 class="mb-2">Etes-vous sûr ?</h3>
+                <p class="mb-2">{{ slotProps?.description }}</p>
+            </template>
+        </Dialog>
         <nav :class="toolBarSize">
-            <ul class="tools">
+            <ul v-if="!toolBarState" class="tools">
                 <li>
-                    <div v-if="toolBarState" class="shrink">
-                        <Button :icon="['arrow-left']" hollow @click="handleToolbar" label="Shrink" />
-                    </div>
-                    <Button v-else @click="handleToolbar" :opts="{ noBorder: true }">
+                    <Button @click="handleToolbar" :opts="{ noBorder: true }">
                         <template #icon>
                             <i class="icon-arrow-right"></i>
                         </template>
                     </Button>
                 </li>
                 <li>
-                    <h4 v-if="toolBarState">Vue</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                    <Button hollow :opts="{ noBorder: true }"
+                        @click="updateView('view', { view: $route.params.view === 'list' ? 'grid' : 'list' })">
                         <template #icon>
-                            <i :class="`icon-${view_type === 'list' ? 'menu' : 'grid'}`"></i>
+                            <i :class="`icon-${$route.params.view === 'list' ? 'grid' : 'menu'}`"></i>
                         </template>
                     </Button>
-                    <div class="mt-2 flex gap-[0.5]" v-if="toolBarState">
-                        <Button class="w-full" icon="menu" :hollow="view_type === 'list' ? false : true" label="Liste"
-                            disabled />
-                        <Button class="w-full" icon="grid" :hollow="view_type === 'grid' ? false : true" label="Grille"
-                            @click="updateView('grid')" />
-                    </div>
                 </li>
                 <li>
-                    <h4 v-if="toolBarState">Actions</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                    <Button hollow :opts="{ noBorder: true }" @click="handleSelectAll">
                         <template #icon>
-                            <i class="icon-power"></i>
+                            <i :class="`icon-checkbox-${selected.length <= 0 ? 'unchecked' : 'checked'}`"></i>
                         </template>
                     </Button>
-                    <div class="flex flex-wrap gap-[0.5] mt-2" v-if="toolBarState">
-                        <Button hollow icon="plus" label="Ajouter" @click="[toggle(), view_type = 'grid']" />
-                        <Button hollow icon="pencil" label="Modifier"
-                            :disabled="!selected.some(el => el.selected === true)" />
-                        <Button hollow icon="trash" label="Supprimer" :disabled="!selected.some(el => el.selected === true)"
-                            @click="deleteImg" />
-                    </div>
+                </li>
+                <li v-if="selected?.length === 0">
+                    <Button hollow :opts="{ noBorder: true }" @click="[toggle(), changeModal('add')]">
+                        <template #icon>
+                            <i class="icon-plus"></i>
+                        </template>
+                    </Button>
+                </li>
+                <li v-else>
+                    <Button hollow :opts="{ noBorder: true }" @click="[toggle(), changeModal('edit')]">
+                        <template #icon>
+                            <i class="icon-pencil"></i>
+                        </template>
+                    </Button>
                 </li>
                 <li>
-                    <h4 v-if="toolBarState">Selection</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                    <Button hollow :opts="{ noBorder: true }"
+                        @click="selected.length > 0 ? handleDeleteImg() : updateView('trash')">
+                        <template #icon>
+                            <i class="icon-trash"></i>
+                        </template>
+                    </Button>
+                </li>
+                <li>
+                    <Button hollow :opts="{ noBorder: true }" @click="handleToolbar">
                         <template #icon>
                             <i class="icon-flag"></i>
                         </template>
                     </Button>
-                    <div class="flex flex-col gap-[0.5] mt-2" v-if="toolBarState">
-                        <Button :hollow="!allSelected" :icon="allSelected ? 'none-circle' : 'check-circle'"
-                            :label="allSelected ? 'Tout déselectionner' : 'Tout sélectionner'"
-                            @click="selectedImg('global')" />
-                    </div>
                 </li>
                 <li>
-                    <h4 v-if="toolBarState">Filtres</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                    <Button hollow :opts="{ noBorder: true }" @click="handleToolbar">
                         <template #icon>
                             <i class="icon-filter"></i>
                         </template>
                     </Button>
-                    <div v-if="toolBarState && (filters && filters.length > 0)">
-                        <BadgePicker v-if="filters" :opts="filters" />
-                    </div>
                 </li>
                 <li>
-                    <h4 v-if="toolBarState">Trier</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                    <Button hollow :opts="{ noBorder: true }" @click="handleToolbar">
                         <template #icon>
                             <i class="icon-sort-asc"></i>
                         </template>
                     </Button>
                 </li>
                 <li>
-                    <h4 v-if="toolBarState">Corbeille</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
-                        <template #icon>
-                            <i class="icon-trash"></i>
-                        </template>
-                    </Button>
-                    <div v-if="toolBarState">
-                        <Button class="mt-2" :hollow="view_type !== 'trash'" icon="eye" label="Afficher la corbeille"
-                            @click="view_type = 'trash'" />
-                    </div>
-                </li>
-                <li>
-                    <h4 v-if="toolBarState">Recherche</h4>
-                    <Button v-else hollow :opts="{ noBorder: true }" @click="handleToolbar">
+                    <Button hollow :opts="{ noBorder: true }" @click="handleToolbar">
                         <template #icon>
                             <i class="icon-search"></i>
                         </template>
                     </Button>
+                </li>
+            </ul>
+            <ul v-else class="tools">
+                <li>
+                    <div class="shrink">
+                        <Button :icon="['arrow-left']" hollow @click="handleToolbar" label="Shrink" />
+                    </div>
+                </li>
+                <li>
+                    <h4>Vue</h4>
+                    <div class="mt-2 flex gap-[0.5]" v-if="toolBarState">
+                        <Button class="w-full" icon="menu" :hollow="$route.params.view !== 'list'" label="Liste"
+                            @click="updateView('view', { view: 'list' })" />
+                        <Button class="w-full" icon="grid" :hollow="$route.params.view !== 'grid'" label="Grille"
+                            @click="updateView('view', { view: 'grid' })" />
+                    </div>
+                </li>
+                <li>
+                    <h4>Actions</h4>
+                    <div class="flex flex-wrap gap-[0.5] mt-2" v-if="toolBarState">
+                        <Button hollow icon="plus" label="Ajouter" @click="[toggle(), changeModal('add')]" />
+                        <Button hollow icon="pencil" label="Modifier" :disabled="selected.length === 0"
+                            @click="[toggle(), changeModal('edit')]" />
+                        <Button hollow icon="trash" label="Supprimer" :disabled="selected.length === 0"
+                            @click="handleDeleteImg" />
+                    </div>
+                </li>
+                <li>
+                    <h4>Selection</h4>
+                    <div class="flex justify-center mt-2" v-if="toolBarState">
+                        <Button class="w-full" :hollow="selected.length <= 0"
+                            :icon="selected.length > 0 ? 'none-circle' : 'check-circle'"
+                            :label="selected.length > 0 ? 'Tout déselectionner' : 'Tout sélectionner'"
+                            @click="handleSelectAll" />
+                    </div>
+                </li>
+                <li>
+                    <h4>Filtres</h4>
+                    <div v-if="toolBarState && (filters && filters.length > 0)">
+                        <BadgePicker v-if="filters" :opts="filters" />
+                    </div>
+                </li>
+                <li>
+                    <h4>Trier</h4>
+                </li>
+                <li>
+                    <h4>Corbeille</h4>
+                    <div>
+                        <Button class="mt-2" :hollow="$route.name !== 'gallery.trash'" icon="eye"
+                            label="Afficher la corbeille" @click="updateView('trash')" />
+                    </div>
+                </li>
+                <li>
+                    <h4>Recherche</h4>
                     <div v-show="toolBarState">
                         <input name="search" type="text" placeholder="Rechercher" />
                     </div>
                 </li>
             </ul>
         </nav>
-        <main v-if="view_type !== 'trash'">
-            <HeaderCounter :count="imgs?.length ?? 0" label="total" />
-            <ul class="view-grid">
-                <li v-if="(imgs && imgs.length > 0) && isSuccess" v-for="img in imgs" :key="img.id">
-                    <Image @click.stop="zoom(img.path)" fake @mouseover="hoveredImg(img.id, true)"
-                        @mouseleave="hoveredImg(img.id, false)" class="card" clickable :border="img.type" :type="img.type"
-                        :src="img.path" :dimensions="img.dimensions" :title="img.name">
-                        <div v-show="isHovered(img.id)" @click.stop="selectedImg('uniq', img.id)"
-                            :class="`cercle ${selected.find(el => el.id === img.id)?.selected === true ? 'selected' : ''}`">
-                        </div>
-                    </Image>
-                </li>
-                <li v-else>Nothing Here...</li>
-
-            </ul>
-        </main>
-        <main v-if="view_type === 'trash'">
-            <component :is="_trash" />
-        </main>
+        <RouterView #default="{ Component }" :key="$route.path">
+            <component ref="$component" :is="Component" @select="handleSelect" @filters="handleFilters" />
+        </RouterView>
         <Modal ref="toggleModal">
-            <component :is="_gallery" :context="{ action: 'add', callables: { toggle } }" />
+            <component :is="_gallery" :context="{
+                action: modal_context,
+                via: 'gallery',
+                subject: selected.length > 0 ? selected[0] : undefined,
+                callables: { toggle }
+            }" />
         </Modal>
-        <ZoomBOX ref="$imgElement" />
     </div>
 </template>
+
 <style scoped lang="scss">
 .container {
     display: flex;
+    min-height: 100%;
     width: calc(100vw - 10vw);
 }
 
 nav {
+
     min-height: 100%;
     padding: .5rem;
     background-color: whitesmoke;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+
+    li>div.flex-col {
+        gap: 2px
+    }
+
+    li:has(> div.test) {
+        position: relative;
+    }
+
+    .shortcut {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-items: center;
+    }
 }
 
 .maxify {
@@ -293,65 +313,6 @@ nav {
     gap: 1rem;
 }
 
-main {
-
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    min-height: 100vh;
-    max-height: 100vh;
-    overflow-y: hidden;
-}
-
-.view-grid {
-    margin: .7rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2vmin;
-    max-height: 100%;
-    overflow-y: auto;
-
-    li {
-        display: flex;
-        flex-wrap: wrap;
-        flex-grow: 1;
-        height: 250px;
-        width: 250px;
-
-        img {
-            width: 100%;
-            height: 100%;
-        }
-    }
-}
-
-.view-list {
-    margin: .7rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2vmin;
-    max-height: 100vh;
-    max-width: 100vw;
-    overflow: auto;
-
-
-    li {
-        display: flex;
-        flex-wrap: wrap;
-        flex-grow: 1;
-        height: 250px;
-        width: 25%;
-
-        img {
-            width: 100%;
-            height: 100%;
-        }
-    }
-}
-
-.card {
-    position: relative;
-}
 
 .cercle {
     &.selected {

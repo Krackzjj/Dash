@@ -1,13 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;700&family=Raleway:wght@100;400;600&display=swap');
 
 @font-face {
-    font-family: 'The-Bold-Font';
-    src: url('fonts/The-Bold-Font.ttf.woff') format('woff'),
-        url('fonts/The-Bold-Font.ttf.svg#The-Bold-Font') format('svg'),
-        url('fonts/The-Bold-Font.ttf.eot'),
-        url('fonts/The-Bold-Font.ttf.eot?#iefix') format('embedded-opentype');
-    font-weight: normal;
-    font-style: normal;
+    font-family: 'Visage Regular';
+    src: url('/fonts/Visage-Regular.eot');
+    src: url('/fonts/Visage-Regular.eot?#iefix') format('embedded-opentype'),
+        url('/fonts/Visage-Regular.woff2') format('woff2'),
+        url('/fonts/Visage-Regular.woff') format('woff'),
+        url('/fonts/Visage-Regular.ttf') format('truetype'),
+        url('/fonts/Visage-Regular.svg#Visage Regular') format('svg');
+}
+
+@font-face {
+    font-family: 'Visage Bold';
+    src: url('/fonts/Visage-Bold.eot');
+    src: url('/fonts/Visage-Bold.eot?#iefix') format('embedded-opentype'),
+        url('/fonts/Visage-Bold.woff2') format('woff2'),
+        url('/fonts/Visage-Bold.woff') format('woff'),
+        url('/fonts/Visage-Bold.ttf') format('truetype'),
+        url('/fonts/Visage-Bold.svg#Visage Bold') format('svg');
 }
 
 
@@ -123,32 +133,4 @@ body {
     100% {
         transform: translateX(100%);
     }
-}
-
-
-
-
-.success {
-    color: var(--success-color);
-}
-
-.danger {
-    color: var(--danger-color);
-}
-
-.justify-center {
-    justify-content: center;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.flex-col {
-    display: flex;
-    flex-direction: column;
-}
-
-.gap-\[0\.5\] {
-    gap: .5rem;
 }

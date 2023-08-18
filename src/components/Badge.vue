@@ -27,7 +27,7 @@ let thisBackground = computed(() => {
 
 <style scoped lang="scss">
 span {
-    font-family: 'The-Bold-Font', sans-serif;
+    font-family: 'Visage Bold', sans-serif;
     font-size: .7rem;
     padding-inline: .8rem;
     padding-block: .5rem;

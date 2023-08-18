@@ -131,6 +131,10 @@ $value in $spacings {
     }
 }
 
+.border {
+    border: 1px solid #ccc;
+}
+
 @each $color,
 $value in $colors {
     .bg-#{$color} {
@@ -147,10 +151,6 @@ $value in $colors {
         &\[i\] {
             color: $value !important;
         }
-    }
-
-    .border {
-        border: 1px solid;
     }
 
     .border-#{$color} {
@@ -247,6 +247,36 @@ $value in $font-sizes {
     }
 }
 
+.justify {
+    &-center {
+        justify-content: center;
+    }
+
+    &-between {
+        justify-content: space-between;
+    }
+
+    &-around {
+        justify-content: space-around;
+    }
+}
+
+
 .bold {
     font-weight: bold;
+}
+
+.udl {
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: .5rem;
+
+}
+
+.gap-\[0\.5\] {
+    gap: .5rem;
+}
+
+.pointer {
+    cursor: pointer;
 }

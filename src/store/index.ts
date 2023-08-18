@@ -1,24 +1,33 @@
 import { defineStore } from 'pinia'
-import { CurrentUser } from '@/types/user'
 
-
-//penser a décpder le jwt
+interface LastGalleryView {
+    name: string | null
+    params: any | null
+}
 
 export const useStore = defineStore('global', {
+
     state: () => ({
-        current_user: {} as CurrentUser,
+        lastGalleryView: {
+            name: null,
+            params: null
+        } as LastGalleryView
     }),
+
     getters: {
-        getCurrentUser(): CurrentUser {
-            return this.current_user
+        lastName(state) {
+            return state.lastGalleryView.name
         },
-        isLogged(): boolean {
-            return this.current_user.token ? true : false
+
+        lastParams(state) {
+            return state.lastGalleryView.params
         }
     },
+
     actions: {
-        setCurrentUser(user: CurrentUser) {
-            this.current_user = user
+        SET_CURRENT_VIEW(name: string, params: any) {
+            this.lastGalleryView.name = name
+            this.lastGalleryView.params = params
         }
     }
 

@@ -51,16 +51,15 @@ defineExpose({
 }
 
 .zoom-img {
-    position: fixed;
-    width: 75%;
+    position: absolute;
+    margin: auto;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 102;
+    overflow: hidden;
 
     img {
-        aspect-ratio: 16/9;
-        object-fit: cover;
         user-select: none;
     }
 }
@@ -74,7 +73,7 @@ img[data-zoom="true"] {
         }
 
         100% {
-            scale: 1;
+            scale: 1.1;
         }
     }
 }
@@ -84,7 +83,7 @@ img[data-zoom="false"] {
 
     @keyframes zoom-out {
         0% {
-            scale: 1;
+            scale: 1.5;
         }
 
         100% {

@@ -1,60 +1,54 @@
 import Home from '@/views/Home.vue'
 import Users from '@/views/Users.vue'
 import Posts from '@/views/Posts.vue'
-import CreatePost from '@/views/CreatePost.vue'
 import Gallery from '@/views/Gallery/Gallery.vue'
-import { Route } from '@/types/Router/Routes'
 
+import { galleryRoutes } from './gallery.routes'
+import { postsRoutes } from './posts.routes'
+import { RouteRecordRaw } from 'vue-router'
 
-export const routes: Route[] = [
+export const routes: RouteRecordRaw[] = [
     {
         path: '/',
         name: 'main.home',
-        label: 'Home',
-        icon: 'home',
         meta: {
-            enable: true,
+            label: 'Home',
+            icon: 'home',
+            visible: true,
         },
         component: Home,
     }, {
-        path: '/gallery',
+        path: '/gallery/:view?',
         name: 'gallery',
-        label: 'Gallery',
-        icon: 'images',
+        redirect: (to) => {
+            return { name: 'gallery.view' }
+        },
         meta: {
-            enable: true,
+            label: 'Gallery',
+            icon: 'images',
+            visible: true,
         },
         component: Gallery,
+        children: galleryRoutes
     },
     {
         path: '/posts',
         name: 'posts.list',
-        label: 'Posts',
-        icon: 'folder',
         meta: {
-            enable: true,
+            label: 'Posts',
+            icon: 'folder',
+            visible: true,
         },
         component: Posts,
-        children: [
-            {
-                path: 'posts/create',
-                name: 'posts.create',
-                label: 'Create',
-                icon: 'pencil',
-                meta: {
-                    enable: true,
-                },
-                component: CreatePost
-            }
-        ]
+        children: postsRoutes
     },
     {
         path: '/users',
         name: 'users.list',
-        label: 'Users',
-        icon: 'user-circle',
         meta: {
-            enable: true,
+            label: 'Users',
+            icon: 'user-circle',
+            visible: true,
         },
         component: Users
     },

@@ -19,7 +19,6 @@ const props = defineProps<Props>()
 const handleClick = (index: number) => {
     if (selectedOpt.value.includes(index)) {
         selectedOpt.value = selectedOpt.value.filter(opt => opt !== index)
-        console.log(selectedOpt.value)
     } else {
         selectedOpt.value.push(index)
     }

@@ -1,78 +1,78 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import type { Home } from '@/schema/HomeSchema.ts'
+// import type { Ref } from 'vue';
+// import type { Home } from '@/schema/HomeSchema.ts'
 
-import { ref } from 'vue';
-import { useApi } from '@/composables/useApi';
+// import { ref } from 'vue';
+// import { useApi } from '@/composables/useApi';
 
-import toast from '@/composables/useToast'
+// import toast from '@/composables/useToast'
 
-let { get, put } = useApi('/misc/home');
+// let { get, put } = useApi('/misc/home');
 
-const { response } = await get();
-const data = response?.reduce((acc: Home, cur: Home) => ({ ...acc, [cur.name]: cur }), {})
+// const { response } = await get();
+// const data = response?.reduce((acc: Home, cur: Home) => ({ ...acc, [cur.name]: cur }), {})
 
-const titleFromApi = ref(data.title.value);
-const subTitleFromApi = ref(data.subtitle.value);
-const messageFromApi = ref(data.hero_text.value);
+// const titleFromApi = ref(data.title.value);
+// const subTitleFromApi = ref(data.subtitle.value);
+// const messageFromApi = ref(data.hero_text.value);
 
-const title = ref(data.title.value.trim());
-const subTitle = ref(data.subtitle.value.trim());
-const message = ref(data.hero_text.value.trim());
-// const logo = ref(data.logo.value.trim());
+// const title = ref(data.title.value.trim());
+// const subTitle = ref(data.subtitle.value.trim());
+// const message = ref(data.hero_text.value.trim());
+// // const logo = ref(data.logo.value.trim());
 
-const focus_title = ref(false)
-const focus_subTitle = ref(false)
-const focus_message = ref(false)
+// const focus_title = ref(false)
+// const focus_subTitle = ref(false)
+// const focus_message = ref(false)
 
 
-const handleUpdate = (value: string, valueAPI: Ref<string>, APIField: string, focus: Ref<boolean>) => {
-    if (value !== valueAPI.value) {
-        put({
-            id: data[APIField].id,
-            name: APIField,
-            value: value
-        });
-        valueAPI.value = value;
-        toast({
-            message: 'Modification effectuée',
-            type: 'success',
-            icon: 'check'
-        })
-        blur()
-        focus.value = false
-    } else {
-        toast({
-            message: 'Aucune modification',
-            type: 'warning',
-            icon: 'warning'
-        })
-    }
-}
+// const handleUpdate = (value: string, valueAPI: Ref<string>, APIField: string, focus: Ref<boolean>) => {
+//     if (value !== valueAPI.value) {
+//         put({
+//             id: data[APIField].id,
+//             name: APIField,
+//             value: value
+//         });
+//         valueAPI.value = value;
+//         toast({
+//             message: 'Modification effectuée',
+//             type: 'success',
+//             icon: 'check'
+//         })
+//         blur()
+//         focus.value = false
+//     } else {
+//         toast({
+//             message: 'Aucune modification',
+//             type: 'warning',
+//             icon: 'warning'
+//         })
+//     }
+// }
 
-const handleTitle = () => {
-    handleUpdate(title.value, titleFromApi, 'title', focus_title)
-}
-const handleSubTitle = () => {
-    handleUpdate(subTitle.value, subTitleFromApi, 'subtitle', focus_subTitle)
-}
-const handleMessage = () => {
-    handleUpdate(message.value, messageFromApi, 'hero_text', focus_message)
-}
+// const handleTitle = () => {
+//     handleUpdate(title.value, titleFromApi, 'title', focus_title)
+// }
+// const handleSubTitle = () => {
+//     handleUpdate(subTitle.value, subTitleFromApi, 'subtitle', focus_subTitle)
+// }
+// const handleMessage = () => {
+//     handleUpdate(message.value, messageFromApi, 'hero_text', focus_message)
+// }
 
-const handleLogo = () => {
-    toast({
-        message: 'Fonctionnalité en cours de développement',
-        type: 'warning',
-        icon: 'warning'
-    })
-}
+// const handleLogo = () => {
+//     toast({
+//         message: 'Fonctionnalité en cours de développement',
+//         type: 'warning',
+//         icon: 'warning'
+//     })
+// }
 
 </script>
 <template>
     <div class="module-container">
         <h1>Bienvenue User</h1>
-        <div class="logo-container">
+        <!-- <div class="logo-container">
             <p>Logo</p>
             <div class="logo-img" @click="handleLogo">
                 <div>
@@ -102,7 +102,7 @@ const handleLogo = () => {
                 <textarea v-model="message" @focus="focus_message = true"></textarea>
             </div>
             <Button color="info" sm :disabled="!focus_message" @click="handleMessage">Modifier</Button>
-        </div>
+        </div> -->
     </div>
 </template>
 <style scoped lang="scss">

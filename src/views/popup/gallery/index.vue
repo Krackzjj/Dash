@@ -1,90 +1,120 @@
 <script setup lang="ts">
-import { ref, toRefs } from 'vue'
+import { computed, toRefs, ref } from 'vue'
+
+import { extract } from '@/utils/extractExt.ts'
 
 import { imgType } from '@/schema/ImgSchema';
 
 import { nanoid } from 'nanoid'
 import { usePostImg } from '@/composables/useImg';
+import { useGetImgById } from '@/composables/useImg';
 
-import url from './_url.vue';
+import URL from '@/views/popup/gallery/add/_url.vue'
+import UPDATE from '@/views/popup/gallery/modify/_update.vue'
+import Loader from '@/components/progress/Loader.vue';
 
 type context = {
     callables: {
         toggle: () => void
     }
-    action: 'add' | 'edit'
-    subject?: imgType
+    action?: 'add' | 'edit'
+    subject?: { id: string, name: string }
+    via?: string
 }
 
 const props = defineProps<{
     context: context
 
 }>()
+const { mutate, isLoading } = usePostImg()
+const { data: img, isSuccess } = useGetImgById(props.context.subject?.id as string)
 
 const { context } = toRefs(props)
 
-const { mutate } = usePostImg()
+const is = computed(() => {
+    return context.value.action === 'add' ? 'Ajout' : 'Modification'
+})
+
 
 
 const choice = ref(false)
 
-type DTO = {
-    description: string
-    name: string
-    url: string
-    dimensions: string
-    external: boolean
+interface DTOType {
+    description: string[]
+    name: string[]
+    url: string[]
+    external: boolean[]
 }
 
-const handleDTO = (dto: DTO) => {
+
+
+const handleDTO = (dto: DTOType) => {
     if (context.value.action === 'add') {
-        let type = dto.url.split('.').pop()
-
-
-        const newDTO: Partial<imgType> = {
-            id: nanoid(),
-            name: dto.name,
-            path: dto.url,
-            type: type as string,
-            external: dto.external,
-            dimensions: dto.dimensions,
-            description: dto.description,
-            published: false
-        }
-        mutate(newDTO, {
-            onSuccess: () => {
-                context.value.callables.toggle()
-            },
-            onError: () => {
-                console.log('error')
+        for (let i = 0; i < dto.url.length; i++) {
+            const newDTO: Partial<imgType> = {
+                id: nanoid(),
+                name: dto.name[i],
+                path: dto.url[i],
+                type: extract(dto.url[i]) as string,
+                external: dto.external[i],
+                description: dto.description[i],
+                published: false
             }
-        })
-    } else {
-        console.log('edit')
+            mutate(newDTO, {
+                onSuccess: () => {
+                    context.value.callables.toggle()
+                },
+                onError: () => {
+                    console.log('error')
+                }
+            })
+        }
     }
+}
+
+const uiName = ref<string | undefined>(context.value.subject?.name)
+
+const handleUiName = (name: string) => {
+    uiName.value = name
 }
 
 </script>
 
 <template>
-    <div>
-        <h2>{{ context.action }} une image</h2>
-        <div class="choice-maker">
+    <div v-if="!isLoading">
+        <h2>{{ is }}
+            <span class="text-info udl">{{ context.action === 'edit' && context.subject && uiName || null
+            }}</span>
+            {{ is === 'Ajout' ? 'à' : 'provenant de' }}
+            {{ context.via }}
+        </h2>
+        <!-- reflechir pour ne pas laissé "provenant de gallery" -->
+        <div v-if="context.action === 'add'" class="choice-maker">
             <Button :hollow="choice" @click="choice = !choice">Via URL</Button>
             <Button :hollow="!choice" @click="choice = !choice">Ajouter</Button>
         </div>
-        <url v-if="!choice" @addbyURL="handleDTO" />
+        <div>
+            <URL v-if="!choice && context.action === 'add'" @addbyURL="handleDTO" />
+            <UPDATE v-else-if="context.action === 'edit' && context.subject && isSuccess" :subject="(img as imgType[])"
+                @name="handleUiName" />
+        </div>
     </div>
+    <Loader class="buffer" v-else type="dot" size="l" />
 </template>
-
 <style scoped lang="scss">
 div:first-child {
     width: 100%;
-    padding: 2rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
 
+.buffer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .choice-maker {
